@@ -1,4 +1,4 @@
-![voxpop-thumbnail-180x60px-01](https://github.com/emel-mobilidade/VoxPop/assets/141622427/d84fc557-7835-4993-bfc0-c27dba867af8)
+![voxpop-thumbnail-180x60px-01](docs/voxpop_logo.png)
 
 # Repositório de dados, documentos e código aberto resultantes do projeto europeu VoxPop
 
