@@ -8,3 +8,5 @@ Este surgiu de uma necessidade identificada por vários atores locais em trabalh
 
 ## O processo
 Para identificar oportunidades de intervenção em cada um dos desafios, os parceiros do VoxPop têm recorrido à ciência de dados, de modo a gerar informação que possibilita criar novas soluções de mobilidade ou melhorar as que já estão disponíveis. Juntamente com as ciências sociais e humanas e com métodos de investigação qualitativa centrados nas pessoas, que é um dos aspetos mais inovadores do projeto, permite assegurar que todas as soluções desenvolvidas têm como foco as reais necessidades, preferências e expectativas de quem irá usufruir das mesmas.
+
+![processo](docs/processo.png)
