@@ -328,7 +328,7 @@
       var averageWidth = feature.properties.AverageWidth.toFixed(1);
 
       if (averageWidth !== "0.0") { // Check if AverageWidth is not equal to 0
-        var popupContent = '<div style="background-color: #2C2B5A; color: ' + feature.layer.paint['line-color'] + '; font-size: 18px; padding: 20px; font-family: Gotham Rounded Medium; border: none;">This Sidewalk has an average width of ' + averageWidth + ' meters<br><a href="' + feature.properties.streetview_url + '" style="text-decoration: underline; font-size: 12px;" target="_blank">Click here for Street View</a></div>';
+        var popupContent = '<div style="background-color: #2C2B5A; color: ' + feature.layer.paint['line-color'] + '; font-size: 18px; padding: 20px; font-family: Gotham Rounded Medium; border: none;">Este passeio tem uma largura média de ' + averageWidth + ' metros<br><a href="' + feature.properties.streetview_url + '" style="text-decoration: underline; font-size: 12px;" target="_blank">Abrir no Street View</a></div>';
 
         popup.setLngLat(e.lngLat).setHTML(popupContent).addTo(map);
 
@@ -345,7 +345,7 @@
       var averageWidth = feature.properties.AverageWidth.toFixed(1);
 
       if (averageWidth !== "0.0") { // Check if AverageWidth is not equal to 0
-        var popupContent = '<div style="background-color: #2C2B5A; color: ' + feature.layer.paint['line-color'] + '; font-size: 18px; padding: 20px; font-family: Gotham Rounded Medium; border: none;">This Sidewalk has an average width of ' + averageWidth + ' meters<br><a href="' + feature.properties.streetview_url + '" style="text-decoration: underline; font-size: 12px;" target="_blank">Click here for Street View</a></div>';
+        var popupContent = '<div style="background-color: #2C2B5A; color: ' + feature.layer.paint['line-color'] + '; font-size: 18px; padding: 20px; font-family: Gotham Rounded Medium; border: none;">Este passeio tem uma largura média de ' + averageWidth + ' meters<br><a href="' + feature.properties.streetview_url + '" style="text-decoration: underline; font-size: 12px;" target="_blank">Abrir no Street View</a></div>';
 
         popup.setLngLat(e.lngLat).setHTML(popupContent).addTo(map);
 
