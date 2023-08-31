@@ -326,9 +326,10 @@
     map.on('mouseover', 'lines-layer', function(e) {
       var feature = e.features[0];
       var averageWidth = feature.properties.AverageWidth.toFixed(1);
+      var idValue = feature.properties.ID; // Assuming "ID" is the correct property name
 
       if (averageWidth !== "0.0") { // Check if AverageWidth is not equal to 0
-        var popupContent = '<div style="background-color: #2C2B5A; color: ' + feature.layer.paint['line-color'] + '; font-size: 18px; padding: 20px; font-family: Gotham Rounded Medium; border: none;">This Sidewalk has an average width of ' + averageWidth + ' meters<br><a href="' + feature.properties.streetview_url + '" style="text-decoration: underline; font-size: 12px;" target="_blank">Click here for Street View</a></div>';
+        var popupContent = '<div style="background-color: #2C2B5A; color: ' + feature.layer.paint['line-color'] + '; font-size: 18px; padding: 20px; font-family: Gotham Rounded Medium; border: none;">This Sidewalk has an average width of ' + averageWidth + ' meters<br><a href="' + feature.properties.streetview_url + '" style="text-decoration: underline; font-size: 12px;" target="_blank">Click here for Street View</a><br><span style="font-size: 8px;">If you think this is incorrect, please click <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=B7vVRFoRjUei7_o5q9y6Rt8e1ta6O-JLhFciYHZ4pUBUNzJVOEQyVU9FN1Q3UzA0V1dRR0NTN0FTVi4u" target="_blank">here</a> and write the reference: ' + idValue + '</span></div>';
 
         popup.setLngLat(e.lngLat).setHTML(popupContent).addTo(map);
 
@@ -343,9 +344,10 @@
     map.on('mouseover', 'lines-layer2', function(e) {
       var feature = e.features[0];
       var averageWidth = feature.properties.AverageWidth.toFixed(1);
+      var idValue = feature.properties.ID; // Assuming "ID" is the correct property name
 
       if (averageWidth !== "0.0") { // Check if AverageWidth is not equal to 0
-        var popupContent = '<div style="background-color: #2C2B5A; color: ' + feature.layer.paint['line-color'] + '; font-size: 18px; padding: 20px; font-family: Gotham Rounded Medium; border: none;">This Sidewalk has an average width of ' + averageWidth + ' meters<br><a href="' + feature.properties.streetview_url + '" style="text-decoration: underline; font-size: 12px;" target="_blank">Click here for Street View</a></div>';
+        var popupContent = '<div style="background-color: #2C2B5A; color: ' + feature.layer.paint['line-color'] + '; font-size: 18px; padding: 20px; font-family: Gotham Rounded Medium; border: none;">This Sidewalk has an average width of ' + averageWidth + ' meters<br><a href="' + feature.properties.streetview_url + '" style="text-decoration: underline; font-size: 12px;" target="_blank">Click here for Street View</a><br><span style="font-size: 8px;">If you think this is incorrect, please click <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=B7vVRFoRjUei7_o5q9y6Rt8e1ta6O-JLhFciYHZ4pUBUNzJVOEQyVU9FN1Q3UzA0V1dRR0NTN0FTVi4u" target="_blank">here</a> and write the reference: ' + idValue + '</span></div>';
 
         popup.setLngLat(e.lngLat).setHTML(popupContent).addTo(map);
 
