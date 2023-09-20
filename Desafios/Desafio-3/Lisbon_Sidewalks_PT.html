@@ -256,7 +256,7 @@
 
     map.addSource('lines', {
       type: 'geojson',
-      data: 'https://emel-mobilidade.github.io/VoxPop/Desafios/Desafio-3/data_sources/data_transformed/Passeios_Centerline.geojson' // URL to your GeoJSON dataset
+      data: 'https://emel-mobilidade.github.io/VoxPop/Desafios/Desafio-3/data_sources/data_transformed/PasseiosLargura_centerline_part1.geojson' // URL to your GeoJSON dataset
     });
 
 
@@ -285,6 +285,36 @@
       }
     });
     
+    map.addSource('lines2', {
+      type: 'geojson',
+      data: 'https://emel-mobilidade.github.io/VoxPop/Desafios/Desafio-3/data_sources/data_transformed/PasseiosLargura_centerline_part2.geojson'
+    });
+
+    map.addLayer({
+      id: 'lines-layer2', // Use a new id for the new layer
+      type: 'line',
+      source: 'lines2', // Use the new source name
+      layout: {
+        'line-join': 'round',
+        'line-cap': 'round'
+      },
+      paint: {
+        'line-color': [
+          'step',
+          ['get', 'AverageWidth'],
+          '#98A4AE',
+          0.01, '#FF0049',
+          0.8, '#FF461E',
+          1.2, '#FF9300',
+          2, '#E4DA27',
+          3, '#1CE262',
+          8.49, '#004CFF'
+        ],
+        'line-width': 1.5
+      }
+    });
+
+
 
     // Create a popup object
     var popup = new mapboxgl.Popup({
@@ -294,6 +324,24 @@
 
     // Add the mouseover event listener to the lines-layer
     map.on('mouseover', 'lines-layer', function(e) {
+      var feature = e.features[0];
+      var averageWidth = feature.properties.AverageWidth.toFixed(1);
+      var idValue = feature.properties.ID; // Assuming "ID" is the correct property name
+
+      if (averageWidth !== "0.0") { // Check if AverageWidth is not equal to 0
+        var popupContent = '<div style="background-color: #2C2B5A; color: ' + feature.layer.paint['line-color'] + '; font-size: 18px; padding: 20px; font-family: Gotham Rounded Medium; border: none;">Este passeio tem uma largura média de ' + averageWidth + ' meters<br><a href="' + feature.properties.streetview_url + '" style="text-decoration: underline; font-size: 12px;" target="_blank">Abrir no Street View</a><br><span style="font-size: 8px;">Se a largura deste passeio está incorreta, clique <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=B7vVRFoRjUei7_o5q9y6Rt8e1ta6O-JLhFciYHZ4pUBUNzJVOEQyVU9FN1Q3UzA0V1dRR0NTN0FTVi4u" target="_blank">aqui</a> e indique a referência: ' + idValue + '</span></div>';
+
+        popup.setLngLat(e.lngLat).setHTML(popupContent).addTo(map);
+
+        // Disable the default behavior of closing the popup on mouseout
+        popup.on('mouseout', function() {
+          popup.remove();
+        });
+      }
+    });
+
+    // Add the mouseover event listener to the lines-layer
+    map.on('mouseover', 'lines-layer2', function(e) {
       var feature = e.features[0];
       var averageWidth = feature.properties.AverageWidth.toFixed(1);
       var idValue = feature.properties.ID; // Assuming "ID" is the correct property name
