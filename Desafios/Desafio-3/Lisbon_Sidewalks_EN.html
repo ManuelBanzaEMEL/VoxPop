@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Lisbon Sidewalks Width</title>
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.css" rel="stylesheet" />
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.min.js"></script>
+<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.css" type="text/css"/>
+<script src="https://unpkg.com/@turf/turf/v6.3.0/turf.min.js"></script>
+<style>
+  body { margin: 0; padding: 0; }
+  #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+  #map-overlay { position: absolute; bottom: 35px; left: 10px; color: black; font-family: Gotham Rounded Medium; font-size: 15px; z-index: 1; }
+  .logo_voxpop { position: absolute; bottom: 30px; left: 10px; width: 55px; height: 45px; }
+  .logo_eu { position: absolute; bottom: 25px; left: 80px; width: 65px; height: 50px; }
+  .logo_uia { position: absolute; bottom: 35px; left: 150px; width: 70px; height: 40px; }
+  .circle { display: inline-block; width: 15px; height: 15px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .one-circle { background-color: #FF0049; }
+  .two-circle { background-color: #FF461E; }
+  .three-circle { background-color: #FF9300; }
+  .four-circle { background-color: #E4DA27; }
+  .five-circle { background-color: #1CE262; }
+  .six-circle { background-color: #004CFF; }
+  .zaac-circle { background-color: #99B8FF70; }
+  .button { position: absolute; top: 10px; left: 15px; width: 15px; height: 20px; background-color: #ffffff; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 1; }
+  .button-icon { font-size: 24px; color: #000000; }
+  .panel { position: absolute; top: 60px; left: 10px; width: 400px; height: 320px; padding: 10px; background-color: #2C2B5A95; color: white; font-family: Gotham Rounded Medium; font-size: 14px; display: none; }
+  .panel-statistics { position: absolute; top: 60px; left: 10px; width: 250px; height: 520px; padding: 10px; background-color: #2C2B5A99; color: white; font-family: Gotham Rounded Medium; font-size: 14px; display: none; }
+  .bar-chart {margin-bottom: 10px;position: relative}
+  .bar-chart-label {margin-bottom: 5px;}
+  .bar-chart-bar-top {left: 5px; width: 1; height: 8px;background-color: #60BD7D;width: 33.33%;}
+  .bar-chart-bar-bottom {left: 5px; width: 1; height: 8px;background-color: #EC424A;width: 33.33%;}
+  .bar-chart-percentage { position: absolute;top: 0;right: 5px;height: 100%;display: flex;align-items: center;color: white;font-size: 12px;}
+
+</style>
+</head>
+<body>
+  <div id='map'></div>
+
+  <div class="button" onclick="togglePanel()">
+    <img class="button-icon" src="https://cdn-icons-png.flaticon.com/512/148/148764.png" style="width: 24px; height: 24px; margin-left: 1px;">
+  </div>
+  
+  <div class="button" onclick="toggleBarChartPanel()" style="left: 60px;">
+    <img class="button-icon" src="https://cdn-icons-png.flaticon.com/512/272/272369.png" style="width: 24px; height: 24px; margin-left: 1px;">
+  </div>
+
+  <div class="slider-container">
+    <input type="range" id="width-slider" min="0" max="8.49" step="0.01" value="0" />
+  </div>
+  
+
+  <div class="panel" id="panel">
+    <h2>🚶 Lisbon Sidewalks Width</h2>
+    <p>
+      This map aims to provide an insight into how sidewalk widths align with the municipal plan for walking accessibility.
+    </p>
+    <p>
+      To know more about this analysis and others, visit the <a href="http://www.voxpoplisboa.pt/" style="color: white;">VOXPOP website</a>.
+    </p>
+    <br>
+    <strong>Sidewalks Width:</strong>
+    <div>
+      <span class="circle one-circle"></span>
+      0 to 0.8 meters
+    </div>
+    <div>
+      <span class="circle two-circle"></span>
+      0.8 to 1.2 meters
+    </div>
+    <div>
+      <span class="circle three-circle"></span>
+      1.2 to 2 meters
+    </div>
+    <div>
+      <span class="circle four-circle"></span>
+      2 to 3 meters
+    </div>
+    <div>
+      <span class="circle five-circle"></span>
+      3 to 8.49 meters
+    </div>
+    <div>
+      <span class="circle six-circle"></span>
+      > 8.49 meters
+    </div>
+    <div>
+      <span class="circle zaac-circle"></span>
+      Restricted Motor Vehicle Access Zones
+    </div>
+  </div>
+
+  <div class="panel-statistics" id="barChartPanel" style="display: none;">
+    <h2>📈 Statistics</h2>
+    <p>
+      Percentage of sidewalks higher then 1.20 meters per parish.
+    </p>
+  Top 5
+    <div class="bar-chart">
+      <div class="bar-chart-label" style="font-size: 11px;">Areeiro</div>
+      <div class="bar-chart-bar-top" style="width: 96%;"></div>
+      <div class="bar-chart-percentage"style="font-size: 11px;">96%</div>
+    </div>
+    <div class="bar-chart">
+      <div class="bar-chart-label" style="font-size: 11px;">Avenidas Novas</div>
+      <div class="bar-chart-bar-top" style="width: 94%;"></div>
+      <div class="bar-chart-percentage" style="font-size: 11px;">94%</div>
+    </div>
+    <div class="bar-chart">
+      <div class="bar-chart-label" style="font-size: 11px;">Olivais</div>
+      <div class="bar-chart-bar-top" style="width: 94%;"></div>
+      <div class="bar-chart-percentage"style="font-size: 11px;">94%</div>
+    </div>
+    <div class="bar-chart">
+      <div class="bar-chart-label" style="font-size: 11px;">Carnide</div>
+      <div class="bar-chart-bar-top" style="width: 94%;"></div>
+      <div class="bar-chart-percentage"style="font-size: 11px;">94%</div>
+    </div>
+    <div class="bar-chart">
+      <div class="bar-chart-label" style="font-size: 11px;">Lumiar</div>
+      <div class="bar-chart-bar-top" style="width: 94%;"></div>
+      <div class="bar-chart-percentage"style="font-size: 11px;">94%</div>
+    </div>
+
+
+    Bottom 5
+    <div class="bar-chart">
+      <div class="bar-chart-label" style="font-size: 11px;">Ajuda</div>
+      <div class="bar-chart-bar-bottom" style="width: 84%;"></div>
+      <div class="bar-chart-percentage"style="font-size: 11px;">84%</div>
+    </div>
+    <div class="bar-chart">
+      <div class="bar-chart-label" style="font-size: 11px;">São Vicente</div>
+      <div class="bar-chart-bar-bottom" style="width: 83%;"></div>
+      <div class="bar-chart-percentage" style="font-size: 11px;">83%</div>
+    </div>
+    <div class="bar-chart">
+      <div class="bar-chart-label" style="font-size: 11px;">Beato</div>
+      <div class="bar-chart-bar-bottom" style="width: 82%;"></div>
+      <div class="bar-chart-percentage"style="font-size: 11px;">82%</div>
+    </div>
+    <div class="bar-chart">
+      <div class="bar-chart-label" style="font-size: 11px;">Penha de França</div>
+      <div class="bar-chart-bar-bottom" style="width: 79%;"></div>
+      <div class="bar-chart-percentage"style="font-size: 11px;">79%</div>
+    </div>
+    <div class="bar-chart">
+      <div class="bar-chart-label" style="font-size: 11px;">Misericórdia</div>
+      <div class="bar-chart-bar-bottom" style="width: 61%;"></div>
+      <div class="bar-chart-percentage"style="font-size: 11px;">61%</div>
+    </div>
+    <!-- Add more bar charts for the remaining options -->
+  </div>
+  
+
+<img class="logo_voxpop" src="https://www.emel.pt/fotos/projectos/logo_thumbnail_180x140px-01-01_3215403765ffda98c69f5b.png" alt="Logo">
+<img class="logo_eu" src="https://ec.europa.eu/regional_policy/sources/graph/panneaux/logo_erdf.png" alt="Logo">
+<img class="logo_uia" src="https://www.uia-initiative.eu/sites/default/files/logo_uia_2.png" alt="Logo">
+<script>
+  mapboxgl.accessToken = 'pk.eyJ1IjoibWFudWVsYmFuemEiLCJhIjoiY2syYzA0NGV0MDcxcTNjbGNlODY4NDR1ZyJ9.SUXHI1TRqNXKr3uPFzgNjQ';
+  const transformRequest = (url) => {
+    const hasQuery = url.indexOf("?") !== -1;
+    const suffix = hasQuery ? "&pluginName=lunchboxIsochrones" : "?pluginName=lunchboxIsochrones";
+    return {
+      url: url + suffix
+    }
+  }
+  
+  const map = new mapboxgl.Map({
+    container: 'map',
+    //style: 'mapbox://styles/mapbox/light-v10',
+    //style: 'mapbox://styles/mapbox/dark-v10',
+    style: 'mapbox://styles/uberdata/cjoqbbf6l9k302sl96tyvka09',
+    //style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+    //style: 'https://manuelbanza.github.io/Artigos/Mapas/style.json',
+    center: [-9.1375946, 38.7331092],
+    zoom: 12,
+    transformRequest: transformRequest
+  });
+
+  const geocoder = new MapboxGeocoder({
+    accessToken: mapboxgl.accessToken,
+    mapboxgl: mapboxgl
+  });
+
+  map.addControl(geocoder, "top-right");
+
+  map.on("load", () => {
+    // Add source and layer for the isochrone
+    map.addSource("iso", {
+      type: "geojson",
+      data: {
+        type: "FeatureCollection",
+        features: []
+      }
+    });
+
+    // Add source and layer for the point data
+    map.addSource("points", {
+      type: "geojson",
+      data: {
+        type: "FeatureCollection",
+        features: []
+      }
+    });
+
+    map.addLayer({
+      "id": "pointsLayer",
+      "type": "circle",
+      "source": "points",
+      "layout": {},
+      "paint": {
+        "circle-color": "blue"
+      }
+    }, "poi-label");
+
+    // Add source and layer for the selected point data
+    map.addSource("selection", {
+      type: "geojson",
+      data: {
+        type: "FeatureCollection",
+        features: []
+      }
+    });
+
+    map.addLayer({
+      "id": "selectionLayer",
+      "type": "circle",
+      "source": "selection",
+      "layout": {},
+      "paint": {
+        "circle-color": "purple"
+      }
+    });
+
+
+
+    map.addSource('zaac', {
+      type: 'geojson',
+      data: 'https://emel-mobilidade.github.io/VoxPop/Desafios/Desafio-3/data_sources/data_raw/zaac.geojson' // Substitua 'zaac.geojson' pelo caminho correto para o seu arquivo geojson
+    });
+
+    map.addLayer({
+      id: 'zaac-layer',
+      type: 'fill',
+      source: 'zaac',
+      paint: {
+        'fill-color': '#99B8FF', // Substitua pela cor desejada para preencher o polígono
+        'fill-opacity': 0.4 // Ajuste a opacidade do preenchimento conforme necessário
+      }
+    });
+
+
+
+    map.addSource('lines', {
+      type: 'geojson',
+      data: 'https://emel-mobilidade.github.io/VoxPop/Desafios/Desafio-3/data_sources/data_transformed/PasseiosLargura_centerline_part1.geojson' // URL to your GeoJSON dataset
+    });
+
+
+
+    map.addLayer({
+      id: 'lines-layer',
+      type: 'line',
+      source: 'lines',
+      layout: {
+        'line-join': 'round',
+        'line-cap': 'round'
+      },
+      paint: {
+        'line-color': [
+          'step',
+          ['get', 'AverageWidth'],
+          '#98A4AE',
+          0.01, '#FF0049', // Color for values <= 0.8
+          0.8, '#FF461E', // Color for values > 0.8 and <= 1.2
+          1.2, '#FF9300', // Color for values > 1.2 and <= 2
+          2, '#E4DA27', // Color for values > 2 and <= 3
+          3, '#1CE262', // Color for values > 3 and <= 8.49
+          8.49, '#004CFF' // Color for values > 8.49
+        ],
+        'line-width': 1.5 // Adjust the line width as per your preference
+      }
+    });
+    
+    map.addSource('lines2', {
+      type: 'geojson',
+      data: 'https://emel-mobilidade.github.io/VoxPop/Desafios/Desafio-3/data_sources/data_transformed/PasseiosLargura_centerline_part2.geojson'
+    });
+
+    map.addLayer({
+      id: 'lines-layer2', // Use a new id for the new layer
+      type: 'line',
+      source: 'lines2', // Use the new source name
+      layout: {
+        'line-join': 'round',
+        'line-cap': 'round'
+      },
+      paint: {
+        'line-color': [
+          'step',
+          ['get', 'AverageWidth'],
+          '#98A4AE',
+          0.01, '#FF0049',
+          0.8, '#FF461E',
+          1.2, '#FF9300',
+          2, '#E4DA27',
+          3, '#1CE262',
+          8.49, '#004CFF'
+        ],
+        'line-width': 1.5
+      }
+    });
+
+
+
+    // Create a popup object
+    var popup = new mapboxgl.Popup({
+      closeButton: false,
+      closeOnClick: false
+    });
+
+    // Add the mouseover event listener to the lines-layer
+    map.on('mouseover', 'lines-layer', function(e) {
+      var feature = e.features[0];
+      var averageWidth = feature.properties.AverageWidth.toFixed(1);
+      var idValue = feature.properties.ID; // Assuming "ID" is the correct property name
+
+      if (averageWidth !== "0.0") { // Check if AverageWidth is not equal to 0
+        var popupContent = '<div style="background-color: #2C2B5A; color: ' + feature.layer.paint['line-color'] + '; font-size: 18px; padding: 20px; font-family: Gotham Rounded Medium; border: none;">This Sidewalk has an average width of ' + averageWidth + ' metros<br><a href="' + feature.properties.streetview_url + '" style="text-decoration: underline; font-size: 12px;" target="_blank">Click here for Street View</a><br><span style="font-size: 8px;">If you think this is incorrect, please click <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=B7vVRFoRjUei7_o5q9y6Rt8e1ta6O-JLhFciYHZ4pUBUNzJVOEQyVU9FN1Q3UzA0V1dRR0NTN0FTVi4u" target="_blank">here</a> and write the reference: ' + idValue + '</span></div>';
+
+        popup.setLngLat(e.lngLat).setHTML(popupContent).addTo(map);
+
+        // Disable the default behavior of closing the popup on mouseout
+        popup.on('mouseout', function() {
+          popup.remove();
+        });
+      }
+    });
+
+
+    // Add the mouseover event listener to the lines-layer
+    map.on('mouseover', 'lines-layer2', function(e) {
+      var feature = e.features[0];
+      var averageWidth = feature.properties.AverageWidth.toFixed(1);
+      var idValue = feature.properties.ID; // Assuming "ID" is the correct property name
+
+      if (averageWidth !== "0.0") { // Check if AverageWidth is not equal to 0
+        var popupContent = '<div style="background-color: #2C2B5A; color: ' + feature.layer.paint['line-color'] + '; font-size: 18px; padding: 20px; font-family: Gotham Rounded Medium; border: none;">This Sidewalk has an average width of ' + averageWidth + ' metros<br><a href="' + feature.properties.streetview_url + '" style="text-decoration: underline; font-size: 12px;" target="_blank">Click here for Street View</a><br><span style="font-size: 8px;">If you think this is incorrect, please click <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=B7vVRFoRjUei7_o5q9y6Rt8e1ta6O-JLhFciYHZ4pUBUNzJVOEQyVU9FN1Q3UzA0V1dRR0NTN0FTVi4u" target="_blank">here</a> and write the reference: ' + idValue + '</span></div>';
+
+        popup.setLngLat(e.lngLat).setHTML(popupContent).addTo(map);
+
+        // Disable the default behavior of closing the popup on mouseout
+        popup.on('mouseout', function() {
+          popup.remove();
+        });
+      }
+    });
+
+
+    // Add a click event listener to the map
+    map.on('click', function() {
+      // Close the popup when the map is clicked
+      if (popup.isOpen()) {
+        popup.remove();
+      }
+    });
+
+    // Add a click event listener to the popup
+    popup.on('click', function() {
+      // Toggle the popup's open state
+      if (popup.isOpen()) {
+        popup.remove();
+      } else {
+        popup.addTo(map);
+      }
+    });
+
+
+
+
+  });
+
+  
+
+  function togglePanel() {
+    var panel = document.getElementById("panel");
+    panel.style.display = panel.style.display === "none" ? "block" : "none";
+  }
+
+  function toggleBarChartPanel() {
+  var panel = document.getElementById("barChartPanel");
+  if (panel.style.display === "none") {
+    panel.style.display = "block";
+  } else {
+    panel.style.display = "none";
+  }
+}
+</script>
+</body>
+</html>
